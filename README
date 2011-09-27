@@ -1,1 +1,4 @@
-This project offers a REST to send some geojson formated data and recieve some calculation or format change according to the request.
+This project offers a REST interface that recieves GeoJSON data and returns
+the same data in a different format.
+
+At the moment it support geojson or json to csv transformations.
