@@ -12,9 +12,18 @@ def geojson_to_csv(request):
     From this featurecollection this function will make a csv
     string and return it as a csv file for download.
     """
+    
     json_string = request.raw_post_data
     
     feature_collection = json.loads(json_string)
+    
+    crs = getattr(feature_collection,
+                  'crs',
+                  {
+                    'type': 'name',
+                    'properties': {
+                        'name': 'urn:ogc:def:crs:EPSG::4979'
+                        }})
     
     features = feature_collection['features']
     
@@ -48,7 +57,7 @@ def geojson_to_csv(request):
         properties['id'] = id
         
         #make the geometry
-        ggeom = GEOSGeometry(json.dumps(feature['geometry']))
+        ggeom = GEOSGeometry(json.dumps(geometry))
         wkt_w = WKTWriter()
         properties['geometry_wkt'] = wkt_w.write(ggeom)
         
@@ -59,6 +68,8 @@ def geojson_to_csv(request):
             #remove harmful characterers
             if type(value) == types.UnicodeType or type(value) == types.StringType:
                 value = value.replace(";", "")
+                value = value.replace("\n", " ")
+                value = value.replace("\r", " ")
             
             #modify value to json string
             value = json.dumps(value)
@@ -76,9 +87,13 @@ def json_to_csv(request):
     This function takes a array of json objects
     and returns a csv file for download.
     """
+    
     json_string = request.raw_post_data
     
     json_array = json.loads(json_string)
+    
+    if type(json_array) == types.DictType:
+        json_array = [json_array]
     
     #this part has to check for nested objects
     csv_header_set = set()
@@ -87,7 +102,7 @@ def json_to_csv(request):
 
     csv_header_list = list(csv_header_set)
     csv_header_list.sort()
-
+    
     #create the csv
     csv_string = u""
     
@@ -103,8 +118,10 @@ def json_to_csv(request):
         for value in value_list:
             
             #remove harmful characterers
-            if type(value) == types.UnicodeType:
+            if type(value) == types.UnicodeType or type(value) == types.StringType:
                 value = value.replace(";", "")
+                value = value.replace("\n", " ")
+                value = value.replace("\r", " ")
             
             #modify value to json string
             value = json.dumps(value)
@@ -112,9 +129,11 @@ def json_to_csv(request):
             csv_string = u"%s%s;" % (csv_string, value)
             
         csv_string = u"%s\n" % (csv_string,)
-        
+    
+    print csv_string
+    
     return HttpResponse(csv_string,
-                        content_type="text/csv")
+                        mimetype='text/csv')
    
 def create_csv_header_set(json_dict):
     
