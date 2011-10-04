@@ -7,7 +7,7 @@ gnt['data_processing'] = {}
  to the server and recieved a csv file
  back with the information in the json
 */
-gnt.data_processing['csv_from_json'] =
+gnt.data_processing['json_to_csv'] =
     function(json_object, callback_function) {
         console.log("send post");
         $.ajax({
@@ -33,4 +33,33 @@ gnt.data_processing['csv_from_json'] =
         });
     }
 
-
+/*
+ This function sends a geojson featurecollection
+ to the server and recieved a csv file
+ back with the information in the geojson featurecollection
+*/
+gnt.data_processing['geojson_to_csv'] =
+    function(json_object, callback_function) {
+        console.log("send post");
+        $.ajax({
+            url: "{% url geojson_to_csv %}",
+            type: "POST",
+            data: JSON.stringify(json_object),
+            contentType: "application/json",
+            success: function(data){
+                if(callback_function !== undefined) {
+                    callback_function(data);
+                    }
+                },
+            error: function(e) {
+                if(callback_function !== undefined) {
+                    callback_function(e);
+                }
+            },
+            dataType: "json",
+            beforeSend: function(xhr){
+                //for cross site authentication using CORS
+                xhr.withCredentials = true;
+                }
+        });
+    }
