@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(
     name='data_processing',
-    version='1.0.0',
+    version='1.0.1',
     author='Kristoffer Snabb',
     url='https://github.com/geonition/django_geojson_data_processing',
     packages=find_packages(),
