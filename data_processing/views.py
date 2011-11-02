@@ -70,6 +70,7 @@ def geojson_to_csv(request):
                 value = value.replace(";", "")
                 value = value.replace("\n", " ")
                 value = value.replace("\r", " ")
+                value = value.replace("\t", " ")
             
             #modify value to json string
             value = json.dumps(value)
@@ -122,7 +123,8 @@ def json_to_csv(request):
                 value = value.replace(";", "")
                 value = value.replace("\n", " ")
                 value = value.replace("\r", " ")
-            
+                value = value.replace("\t", " ")
+                
             #modify value to json string
             value = json.dumps(value)
             
@@ -130,13 +132,16 @@ def json_to_csv(request):
             
         csv_string = u"%s\n" % (csv_string,)
     
-    print csv_string
-    
     return HttpResponse(csv_string,
                         mimetype='text/csv')
    
 def create_csv_header_set(json_dict):
-    
+    """
+    This function returns a set of header
+    field names created according
+    to the keys and sub dictionaries
+    foung in the given json_dict.
+    """
     csv_header_set = set()
     
     for key, item in json_dict.items():
@@ -151,6 +156,12 @@ def create_csv_header_set(json_dict):
     return csv_header_set
 
 def get_value_list(json_dict, key_list):
+    """
+    Given the key_list this function returns
+    a list of values that are can be found in
+    the given json_dict. The not found values
+    will be an empty string.
+    """
     
     value_list = []
     
