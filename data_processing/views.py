@@ -3,6 +3,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import WKTWriter
 from django.utils import simplejson as json
 import types
+import string
 
 def geojson_to_csv(request):
     """
@@ -67,10 +68,13 @@ def geojson_to_csv(request):
             
             #remove harmful characterers
             if type(value) == types.UnicodeType or type(value) == types.StringType:
-                value = value.replace(";", "")
+                for c in string.whitespace:
+                    value = value.replace(c, " ")
+            
                 value = value.replace("\n", " ")
                 value = value.replace("\r", " ")
-                value = value.replace("\t", " ")
+                value = value.replace(";", " ")
+                value = value.strip()
             
             #modify value to json string
             value = json.dumps(value)
@@ -120,10 +124,14 @@ def json_to_csv(request):
             
             #remove harmful characterers
             if type(value) == types.UnicodeType or type(value) == types.StringType:
-                value = value.replace(";", "")
+                for c in string.whitespace:
+                    value = value.replace(c, " ")
+            
                 value = value.replace("\n", " ")
                 value = value.replace("\r", " ")
-                value = value.replace("\t", " ")
+                value = value.replace(";", " ")
+                value = value.strip()
+            
                 
             #modify value to json string
             value = json.dumps(value)

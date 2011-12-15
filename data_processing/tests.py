@@ -29,7 +29,7 @@ class FormatTest(TestCase):
         "null;",
         "1;",
         "true;",
-        "\"some :tricky. ,  string\";\n") #remove ; characters
+        "\"some  :tricky. ,  string\";\n") #remove ; characters
             
         self.geojson_dict = {
             'type': 'FeatureCollection',
@@ -73,10 +73,10 @@ class FormatTest(TestCase):
         "id;geometry_wkt;array;boolean;key;null_value;number;",
         "object.nested;some_unique_val;string;\n",
         "1;\"POINT (1.0000000000000000 2.0000000000000000)\";[1, 2, 3];true;\"value\";null;1;true;\"\";",
-        "\"some :tricky. ,  string\";\n", #remove ; characters
+        "\"some  :tricky. ,  string\";\n", #remove ; characters
         "2;\"POLYGON ((100.0000000000000000 0.0000000000000000, 101.0000000000000000 0.0000000000000000, 101.0000000000000000 1.0000000000000000, 100.0000000000000000 1.0000000000000000, 100.0000000000000000 0.0000000000000000))\";",
         "\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\n", 
-        "null;\"LINESTRING (100.0000000000000000 0.0000000000000000, 101.0000000000000000 1.0000000000000000)\";\"\";\"\";\"\";\"\";\"\";\"\";\"yes this is it\";\"\";\n") 
+        "null;\"LINESTRING (100.0000000000000000 0.0000000000000000, 101.0000000000000000 1.0000000000000000)\";\"\";\"\";\"\";\"\";\"\";\"\";\"yes  this is it\";\"\";\n") 
         
     def test_json_to_csv(self):
         #send json to url
