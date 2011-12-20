@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data = {
-        "geojson_rest": [
+        "data_processing": [
             "templates/*.js",
             "templates/*.html"
         ],
