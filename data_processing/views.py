@@ -75,6 +75,7 @@ def geojson_to_csv(request):
             csv_row.append("%s;" % value)
 
         csv_rows.append(''.join(csv_row))
+        csv_row = []
 
     csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
 
@@ -131,6 +132,7 @@ def json_to_csv(request):
             csv_row.append("%s;" % value)
 
         csv_rows.append(''.join(csv_row))
+        csv_row = []
 
     csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
 
