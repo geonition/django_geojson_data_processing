@@ -127,7 +127,7 @@ def json_to_csv(request):
                 value = value.replace("\r", " ")
 
             #modify value to json string
-            value = json.dumps(value)
+            #value = json.dumps(value)
 
             csv_row.append("%s;" % value)
 
@@ -166,7 +166,7 @@ def get_value_list(json_dict, key_list):
             if json_dict.has_key(key):
                 value_list.append(json_dict[key])
             else:
-                value_list.append("")
+                value_list.append('')
         else:
             temp_key = ""
 
