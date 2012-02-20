@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.geos import WKTWriter
 from django.utils import simplejson as json
+
 import types
 
 def geojson_to_csv(request):
@@ -13,74 +13,75 @@ def geojson_to_csv(request):
     string and return it as a csv file for download.
     """
 
-    json_string = request.raw_post_data
+    if request.method == "POST":
+        feature_collection = json.loads(request.POST.keys()[0])
 
-    feature_collection = json.loads(json_string)
+        crs = getattr(feature_collection,
+                      'crs',
+                      {
+                        'type': 'name',
+                        'properties': {
+                            'name': 'urn:ogc:def:crs:EPSG::4979'
+                            }})
 
-    crs = getattr(feature_collection,
-                  'crs',
-                  {
-                    'type': 'name',
-                    'properties': {
-                        'name': 'urn:ogc:def:crs:EPSG::4979'
-                        }})
+        features = feature_collection['features']
 
-    features = feature_collection['features']
+        csv_header_set = set()
+        for feature in features:
+            csv_header_set.update(create_csv_header_set(feature['properties']))
 
-    csv_header_set = set()
-    for feature in features:
-        csv_header_set.update(create_csv_header_set(feature['properties']))
+        csv_header_list = list(csv_header_set)
+        csv_header_list.sort()
+        csv_header_list.insert(0, 'wkt')
+        csv_header_list.insert(0, 'id')
 
-    csv_header_list = list(csv_header_set)
-    csv_header_list.sort()
-    csv_header_list.insert(0, 'wkt')
-    csv_header_list.insert(0, 'id')
+        #create the csv
+        csv_string = u""
 
-    #create the csv
-    csv_string = u""
+        #write the header
+        for header in csv_header_list:
+            csv_string = u"%s%s;" % (csv_string, header)
 
-    #write the header
-    for header in csv_header_list:
-        csv_string = u"%s%s;" % (csv_string, header)
-
-    csv_string = u"%s\n" % (csv_string,)
-    csv_row = []
-    csv_rows = []
-    print csv_string
-
-    for feature in features:
-
-        geometry = feature['geometry']
-        properties = feature['properties']
-
-        id = None
-        if feature.has_key('id'):
-            id = feature['id']
-
-        properties['id'] = id
-
-        #make the geometry
-        properties['wkt'] = GEOSGeometry(json.dumps(geometry)).wkt
-
-        value_list = get_value_list(properties, csv_header_list)
-
-        for value in value_list:
-
-            #remove harmful characterers
-            if type(value) == types.UnicodeType or type(value) == types.StringType:
-                value = value.replace(";", "")
-                value = value.replace("\n", " ")
-                value = value.replace("\r", " ")
-
-            csv_row.append("%s;" % value)
-
-        csv_rows.append(''.join(csv_row))
+        csv_string = u"%s\n" % (csv_string,)
         csv_row = []
+        csv_rows = []
+        print csv_string
 
-    csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
+        for feature in features:
 
-    return HttpResponse(csv_string,
-                        content_type='text/csv')
+            geometry = feature['geometry']
+            properties = feature['properties']
+
+            id = None
+            if feature.has_key('id'):
+                id = feature['id']
+
+            properties['id'] = id
+
+            #make the geometry
+            properties['wkt'] = GEOSGeometry(json.dumps(geometry)).wkt
+
+            value_list = get_value_list(properties, csv_header_list)
+
+            for value in value_list:
+
+                #remove harmful characterers
+                if type(value) == types.UnicodeType or type(value) == types.StringType:
+                    value = value.replace(";", "")
+                    value = value.replace("\n", " ")
+                    value = value.replace("\r", " ")
+
+                csv_row.append("%s;" % value)
+
+            csv_rows.append(''.join(csv_row))
+            csv_row = []
+
+        csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
+
+        return HttpResponse(csv_string,
+                            content_type='text/csv')
+    else:
+        return HttpResponse("This view only takes POST requests")
 
 
 def json_to_csv(request):
@@ -89,55 +90,56 @@ def json_to_csv(request):
     and returns a csv file for download.
     """
 
-    json_string = request.raw_post_data
+    if request.method == "POST":
+        json_array = json.loads(request.POST.keys()[0])
 
-    json_array = json.loads(json_string)
+        if type(json_array) == types.DictType:
+            json_array = [json_array]
 
-    if type(json_array) == types.DictType:
-        json_array = [json_array]
+        #this part has to check for nested objects
+        csv_header_set = set()
+        for json_dict in json_array:
+            csv_header_set.update(create_csv_header_set(json_dict))
 
-    #this part has to check for nested objects
-    csv_header_set = set()
-    for json_dict in json_array:
-        csv_header_set.update(create_csv_header_set(json_dict))
+        csv_header_list = list(csv_header_set)
+        csv_header_list.sort()
 
-    csv_header_list = list(csv_header_set)
-    csv_header_list.sort()
+        #create the csv
+        csv_string = u""
 
-    #create the csv
-    csv_string = u""
+        #write the header
+        for header in csv_header_list:
+            csv_string = u"%s%s;" % (csv_string, header)
 
-    #write the header
-    for header in csv_header_list:
-        csv_string = u"%s%s;" % (csv_string, header)
-
-    csv_string = u"%s\n" % (csv_string,)
-    csv_row = []
-    csv_rows = []
-
-    for json_dict in json_array:
-        value_list = get_value_list(json_dict, csv_header_list)
-
-        for value in value_list:
-
-            #remove harmful characterers
-            if type(value) == types.UnicodeType or type(value) == types.StringType:
-                value = value.replace(";", "")
-                value = value.replace("\n", " ")
-                value = value.replace("\r", " ")
-
-            #modify value to json string
-            #value = json.dumps(value)
-
-            csv_row.append("%s;" % value)
-
-        csv_rows.append(''.join(csv_row))
+        csv_string = u"%s\n" % (csv_string,)
         csv_row = []
+        csv_rows = []
 
-    csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
+        for json_dict in json_array:
+            value_list = get_value_list(json_dict, csv_header_list)
 
-    return HttpResponse(csv_string,
-                        mimetype='text/csv')
+            for value in value_list:
+
+                #remove harmful characterers
+                if type(value) == types.UnicodeType or type(value) == types.StringType:
+                    value = value.replace(";", "")
+                    value = value.replace("\n", " ")
+                    value = value.replace("\r", " ")
+
+                #modify value to json string
+                #value = json.dumps(value)
+
+                csv_row.append("%s;" % value)
+
+            csv_rows.append(''.join(csv_row))
+            csv_row = []
+
+        csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
+
+        return HttpResponse(csv_string,
+                            mimetype='text/csv')
+    else:
+        return HttpResponse("This view only takes POST requests")
 
 def create_csv_header_set(json_dict):
 
