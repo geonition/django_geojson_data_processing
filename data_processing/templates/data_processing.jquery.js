@@ -9,7 +9,6 @@ gnt['data_processing'] = {}
 */
 gnt.data_processing['json_to_csv'] =
     function(json_object, callback_function) {
-        console.log("send post");
         $.ajax({
             url: "{% url json_to_csv %}",
             type: "POST",
@@ -40,7 +39,6 @@ gnt.data_processing['json_to_csv'] =
 */
 gnt.data_processing['geojson_to_csv'] =
     function(json_object, callback_function) {
-        console.log("send post");
         $.ajax({
             url: "{% url geojson_to_csv %}",
             type: "POST",
