@@ -14,7 +14,7 @@ def geojson_to_csv(request):
     """
 
     if request.method == "POST":
-        feature_collection = json.loads(request.POST.keys()[0])
+        feature_collection = json.loads(request.raw_post_data)
 
         crs = getattr(feature_collection,
                       'crs',
@@ -45,7 +45,6 @@ def geojson_to_csv(request):
         csv_string = u"%s\n" % (csv_string,)
         csv_row = []
         csv_rows = []
-        print csv_string
 
         for feature in features:
 
@@ -78,6 +77,8 @@ def geojson_to_csv(request):
 
         csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
 
+        print csv_string
+
         return HttpResponse(csv_string,
                             content_type='text/csv')
     else:
@@ -91,7 +92,7 @@ def json_to_csv(request):
     """
 
     if request.method == "POST":
-        json_array = json.loads(request.POST.keys()[0])
+        json_array = json.loads(request.raw_post_data)
 
         if type(json_array) == types.DictType:
             json_array = [json_array]
