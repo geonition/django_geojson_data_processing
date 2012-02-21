@@ -77,8 +77,6 @@ def geojson_to_csv(request):
 
         csv_string = "%s%s" % (csv_string, '\n'.join(csv_rows))
 
-        print csv_string
-
         return HttpResponse(csv_string,
                             content_type='text/csv')
     else:
@@ -106,7 +104,7 @@ def json_to_csv(request):
         csv_header_list.sort()
 
         #create the csv
-        csv_string = u""
+        csv_string = u""p
 
         #write the header
         for header in csv_header_list:
