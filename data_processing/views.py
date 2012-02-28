@@ -104,7 +104,7 @@ def json_to_csv(request):
         csv_header_list.sort()
 
         #create the csv
-        csv_string = u""p
+        csv_string = u""
 
         #write the header
         for header in csv_header_list:
